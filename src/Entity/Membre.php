@@ -19,6 +19,10 @@ class Membre
     #[ORM\Column]
     private ?bool $isGroupeOwner = null;
 
+    #[ORM\OneToOne(inversedBy: 'membre', cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $compte = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -44,6 +48,18 @@ class Membre
     public function setIsGroupeOwner(bool $isGroupeOwner): static
     {
         $this->isGroupeOwner = $isGroupeOwner;
+
+        return $this;
+    }
+
+    public function getCompte(): ?User
+    {
+        return $this->compte;
+    }
+
+    public function setCompte(User $compte): static
+    {
+        $this->compte = $compte;
 
         return $this;
     }
