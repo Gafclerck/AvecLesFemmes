@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\MembreRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: MembreRepository::class)]
@@ -22,6 +24,21 @@ class Membre
     #[ORM\OneToOne(inversedBy: 'membre', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $compte = null;
+
+    /**
+     * @var Collection<int, MembreCampagne>
+     */
+    #[ORM\OneToMany(targetEntity: MembreCampagne::class, mappedBy: 'membre')]
+    private Collection $membreCampagnes;
+
+    #[ORM\ManyToOne(inversedBy: 'membres')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Groupement $groupement = null;
+
+    public function __construct()
+    {
+        $this->membreCampagnes = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -60,6 +77,48 @@ class Membre
     public function setCompte(User $compte): static
     {
         $this->compte = $compte;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, MembreCampagne>
+     */
+    public function getMembreCampagnes(): Collection
+    {
+        return $this->membreCampagnes;
+    }
+
+    public function addMembreCampagne(MembreCampagne $membreCampagne): static
+    {
+        if (!$this->membreCampagnes->contains($membreCampagne)) {
+            $this->membreCampagnes->add($membreCampagne);
+            $membreCampagne->setMembre($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMembreCampagne(MembreCampagne $membreCampagne): static
+    {
+        if ($this->membreCampagnes->removeElement($membreCampagne)) {
+            // set the owning side to null (unless already changed)
+            if ($membreCampagne->getMembre() === $this) {
+                $membreCampagne->setMembre(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getGroupement(): ?Groupement
+    {
+        return $this->groupement;
+    }
+
+    public function setGroupement(?Groupement $groupement): static
+    {
+        $this->groupement = $groupement;
 
         return $this;
     }

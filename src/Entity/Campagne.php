@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\CampagneRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -34,6 +36,21 @@ abstract class Campagne
 
     #[ORM\Column(type: Types::DECIMAL, precision: 15, scale: 0)]
     private ?string $montant = null;
+
+    /**
+     * @var Collection<int, MembreCampagne>
+     */
+    #[ORM\OneToMany(targetEntity: MembreCampagne::class, mappedBy: 'campagne')]
+    private Collection $membreCampagnes;
+
+    #[ORM\ManyToOne(inversedBy: 'campagnes')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Groupement $groupement = null;
+
+    public function __construct()
+    {
+        $this->membreCampagnes = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -96,6 +113,48 @@ abstract class Campagne
     public function setMontant(string $montant): static
     {
         $this->montant = $montant;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, MembreCampagne>
+     */
+    public function getMembreCampagnes(): Collection
+    {
+        return $this->membreCampagnes;
+    }
+
+    public function addMembreCampagne(MembreCampagne $membreCampagne): static
+    {
+        if (!$this->membreCampagnes->contains($membreCampagne)) {
+            $this->membreCampagnes->add($membreCampagne);
+            $membreCampagne->setCampagne($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMembreCampagne(MembreCampagne $membreCampagne): static
+    {
+        if ($this->membreCampagnes->removeElement($membreCampagne)) {
+            // set the owning side to null (unless already changed)
+            if ($membreCampagne->getCampagne() === $this) {
+                $membreCampagne->setCampagne(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getGroupement(): ?Groupement
+    {
+        return $this->groupement;
+    }
+
+    public function setGroupement(?Groupement $groupement): static
+    {
+        $this->groupement = $groupement;
 
         return $this;
     }
