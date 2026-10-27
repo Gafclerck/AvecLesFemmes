@@ -31,6 +31,10 @@ class Membre
     #[ORM\OneToMany(targetEntity: MembreCampagne::class, mappedBy: 'membre')]
     private Collection $membreCampagnes;
 
+    #[ORM\ManyToOne(inversedBy: 'membres')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Groupement $groupement = null;
+
     public function __construct()
     {
         $this->membreCampagnes = new ArrayCollection();
@@ -103,6 +107,18 @@ class Membre
                 $membreCampagne->setMembre(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getGroupement(): ?Groupement
+    {
+        return $this->groupement;
+    }
+
+    public function setGroupement(?Groupement $groupement): static
+    {
+        $this->groupement = $groupement;
 
         return $this;
     }
