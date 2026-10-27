@@ -32,9 +32,16 @@ class MembreCampagne
     #[ORM\OneToMany(targetEntity: Cotisation::class, mappedBy: 'membreCampagne')]
     private Collection $cotisations;
 
+    /**
+     * @var Collection<int, Pret>
+     */
+    #[ORM\OneToMany(targetEntity: Pret::class, mappedBy: 'membreCampagne')]
+    private Collection $prets;
+
     public function __construct()
     {
         $this->cotisations = new ArrayCollection();
+        $this->prets = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -102,6 +109,36 @@ class MembreCampagne
             // set the owning side to null (unless already changed)
             if ($cotisation->getMembreCampagne() === $this) {
                 $cotisation->setMembreCampagne(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Pret>
+     */
+    public function getPrets(): Collection
+    {
+        return $this->prets;
+    }
+
+    public function addPret(Pret $pret): static
+    {
+        if (!$this->prets->contains($pret)) {
+            $this->prets->add($pret);
+            $pret->setMembreCampagne($this);
+        }
+
+        return $this;
+    }
+
+    public function removePret(Pret $pret): static
+    {
+        if ($this->prets->removeElement($pret)) {
+            // set the owning side to null (unless already changed)
+            if ($pret->getMembreCampagne() === $this) {
+                $pret->setMembreCampagne(null);
             }
         }
 
