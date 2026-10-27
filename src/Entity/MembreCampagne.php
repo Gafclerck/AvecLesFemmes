@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\MembreCampagneRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: MembreCampagneRepository::class)]
@@ -23,6 +25,17 @@ class MembreCampagne
     #[ORM\ManyToOne(inversedBy: 'membreCampagnes')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Campagne $campagne = null;
+
+    /**
+     * @var Collection<int, Cotisation>
+     */
+    #[ORM\OneToMany(targetEntity: Cotisation::class, mappedBy: 'membreCampagne')]
+    private Collection $cotisations;
+
+    public function __construct()
+    {
+        $this->cotisations = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -61,6 +74,36 @@ class MembreCampagne
     public function setCampagne(?Campagne $campagne): static
     {
         $this->campagne = $campagne;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Cotisation>
+     */
+    public function getCotisations(): Collection
+    {
+        return $this->cotisations;
+    }
+
+    public function addCotisation(Cotisation $cotisation): static
+    {
+        if (!$this->cotisations->contains($cotisation)) {
+            $this->cotisations->add($cotisation);
+            $cotisation->setMembreCampagne($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCotisation(Cotisation $cotisation): static
+    {
+        if ($this->cotisations->removeElement($cotisation)) {
+            // set the owning side to null (unless already changed)
+            if ($cotisation->getMembreCampagne() === $this) {
+                $cotisation->setMembreCampagne(null);
+            }
+        }
 
         return $this;
     }
