@@ -37,10 +37,20 @@ class Groupement
     #[ORM\OneToMany(targetEntity: Campagne::class, mappedBy: 'groupement')]
     private Collection $campagnes;
 
+    /**
+     * @var Collection<int, Exercice>
+     */
+    #[ORM\OneToMany(targetEntity: Exercice::class, mappedBy: 'groupement', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $exercices;
+
+    #[ORM\OneToOne(mappedBy: 'groupement', targetEntity: CaisseSociale::class, cascade: ['persist', 'remove'])]
+    private ?CaisseSociale $caisseSociale = null;
+
     public function __construct()
     {
         $this->membres = new ArrayCollection();
         $this->campagnes = new ArrayCollection();
+        $this->exercices = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -128,6 +138,57 @@ class Groupement
                 $campagne->setGroupement(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Exercice>
+     */
+    public function getExercices(): Collection
+    {
+        return $this->exercices;
+    }
+
+    public function addExercice(Exercice $exercice): static
+    {
+        if (!$this->exercices->contains($exercice)) {
+            $this->exercices->add($exercice);
+            $exercice->setGroupement($this);
+        }
+
+        return $this;
+    }
+
+    public function removeExercice(Exercice $exercice): static
+    {
+        if ($this->exercices->removeElement($exercice)) {
+            if ($exercice->getGroupement() === $this) {
+                $exercice->setGroupement(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getCaisseSociale(): ?CaisseSociale
+    {
+        return $this->caisseSociale;
+    }
+
+    public function setCaisseSociale(?CaisseSociale $caisseSociale): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($caisseSociale === null && $this->caisseSociale !== null) {
+            // CaisseSociale is owning side
+        }
+
+        // set the owning side of the relation if necessary
+        if ($caisseSociale !== null && $caisseSociale->getGroupement() !== $this) {
+            $caisseSociale->setGroupement($this);
+        }
+
+        $this->caisseSociale = $caisseSociale;
 
         return $this;
     }
