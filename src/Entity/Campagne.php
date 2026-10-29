@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\Periodicite;
 use App\Repository\CampagneRepository;
 use App\Trait\DateTimeTrait;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -38,8 +39,26 @@ abstract class Campagne
     #[ORM\Column]
     private ?\DateTimeImmutable $dateFinAt = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 15, scale: 0)]
+    #[ORM\Column(type: Types::DECIMAL, precision: 15, scale: 2)]
     private ?string $montant = null;
+
+    #[ORM\Column(length: 30, enumType: Periodicite::class, nullable: true)]
+    private ?Periodicite $periodicite = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $jourRencontre = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    private ?string $montantFixe = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    private ?string $montantCaissePresent = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    private ?string $montantCaisseAbsent = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    private ?string $amendeJournaliere = null;
 
     /**
      * @var Collection<int, MembreCampagne>
@@ -50,6 +69,10 @@ abstract class Campagne
     #[ORM\ManyToOne(inversedBy: 'campagnes')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Groupement $groupement = null;
+
+    #[ORM\ManyToOne(inversedBy: 'campagnes', targetEntity: Exercice::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Exercice $exercice = null;
 
     public function __construct()
     {
@@ -97,6 +120,18 @@ abstract class Campagne
         return $this;
     }
 
+    public function getDateDebut(): ?\DateTimeImmutable
+    {
+        return $this->dateDebutAt;
+    }
+
+    public function setDateDebut(\DateTimeImmutable $dateDebut): static
+    {
+        $this->dateDebutAt = $dateDebut;
+
+        return $this;
+    }
+
     public function getDateFinAt(): ?\DateTimeImmutable
     {
         return $this->dateFinAt;
@@ -109,14 +144,98 @@ abstract class Campagne
         return $this;
     }
 
+    public function getDateFin(): ?\DateTimeImmutable
+    {
+        return $this->dateFinAt;
+    }
+
+    public function setDateFin(\DateTimeImmutable $dateFin): static
+    {
+        $this->dateFinAt = $dateFin;
+
+        return $this;
+    }
+
     public function getMontant(): ?string
     {
         return $this->montant;
     }
 
-    public function setMontant(string $montant): static
+    public function setMontant(string|float $montant): static
     {
-        $this->montant = $montant;
+        $this->montant = (string) $montant;
+
+        return $this;
+    }
+
+    public function getPeriodicite(): ?Periodicite
+    {
+        return $this->periodicite;
+    }
+
+    public function setPeriodicite(?Periodicite $periodicite): static
+    {
+        $this->periodicite = $periodicite;
+
+        return $this;
+    }
+
+    public function getJourRencontre(): ?string
+    {
+        return $this->jourRencontre;
+    }
+
+    public function setJourRencontre(?string $jourRencontre): static
+    {
+        $this->jourRencontre = $jourRencontre;
+
+        return $this;
+    }
+
+    public function getMontantFixe(): ?string
+    {
+        return $this->montantFixe;
+    }
+
+    public function setMontantFixe(string|float|null $montantFixe): static
+    {
+        $this->montantFixe = $montantFixe !== null ? (string) $montantFixe : null;
+
+        return $this;
+    }
+
+    public function getMontantCaissePresent(): ?string
+    {
+        return $this->montantCaissePresent;
+    }
+
+    public function setMontantCaissePresent(string|float|null $montantCaissePresent): static
+    {
+        $this->montantCaissePresent = $montantCaissePresent !== null ? (string) $montantCaissePresent : null;
+
+        return $this;
+    }
+
+    public function getMontantCaisseAbsent(): ?string
+    {
+        return $this->montantCaisseAbsent;
+    }
+
+    public function setMontantCaisseAbsent(string|float|null $montantCaisseAbsent): static
+    {
+        $this->montantCaisseAbsent = $montantCaisseAbsent !== null ? (string) $montantCaisseAbsent : null;
+
+        return $this;
+    }
+
+    public function getAmendeJournaliere(): ?string
+    {
+        return $this->amendeJournaliere;
+    }
+
+    public function setAmendeJournaliere(string|float|null $amendeJournaliere): static
+    {
+        $this->amendeJournaliere = $amendeJournaliere !== null ? (string) $amendeJournaliere : null;
 
         return $this;
     }
@@ -142,7 +261,6 @@ abstract class Campagne
     public function removeMembreCampagne(MembreCampagne $membreCampagne): static
     {
         if ($this->membreCampagnes->removeElement($membreCampagne)) {
-            // set the owning side to null (unless already changed)
             if ($membreCampagne->getCampagne() === $this) {
                 $membreCampagne->setCampagne(null);
             }
@@ -159,6 +277,18 @@ abstract class Campagne
     public function setGroupement(?Groupement $groupement): static
     {
         $this->groupement = $groupement;
+
+        return $this;
+    }
+
+    public function getExercice(): ?Exercice
+    {
+        return $this->exercice;
+    }
+
+    public function setExercice(?Exercice $exercice): static
+    {
+        $this->exercice = $exercice;
 
         return $this;
     }
