@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use App\Trait\DateTimeTrait;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -10,8 +11,11 @@ use Symfony\Component\Security\Core\User\UserInterface;
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_TELEPHONE', fields: ['telephone'])]
+#[ORM\HasLifecycleCallbacks]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
+    use DateTimeTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
