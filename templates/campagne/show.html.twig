@@ -1,0 +1,203 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ campagne.nom }} — Calebasses Teranga{% endblock %}
+
+{% block body %}
+<!-- Fil d'Ariane -->
+<nav class="breadcrumb-teranga" aria-label="breadcrumb">
+    <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a href="{{ path('app_groupement_index') }}"><i class="bi bi-house-door-fill me-1"></i>Accueil</a></li>
+        <li class="breadcrumb-item"><a href="{{ path('app_groupement_show', {id: campagne.groupementId}) }}">{{ campagne.groupementNom }}</a></li>
+        <li class="breadcrumb-item active text-dark" aria-current="page">{{ campagne.nom }}</li>
+    </ol>
+</nav>
+
+<!-- En-tête Campagne & Paramètres Métier -->
+<div class="card card-teranga p-4 p-md-5 mb-5 border-0 shadow-sm" style="background: linear-gradient(135deg, #0B4F30 0%, #173B2B 100%); color: #FFFFFF;">
+    <div class="row align-items-center g-4">
+        <div class="col-lg-8">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge {% if campagne.type == 'Tontine' %}badge-terre{% else %}badge-gold{% endif %} text-uppercase px-3 py-2">
+                    {{ campagne.type }}
+                </span>
+                <span class="text-white-50 small"><i class="bi bi-building me-1"></i>{{ campagne.groupementNom }}</span>
+            </div>
+
+            <h1 class="display-6 fw-bold mb-3">{{ campagne.nom }}</h1>
+            <p class="text-light opacity-75 mb-4" style="max-width: 600px;">
+                Activité d'épargne rotative et solidaire cadencée sur le cycle <strong>{{ campagne.exercicePeriode|default('2026') }}</strong>.
+                Chaque membre contribue à son rythme selon les règles convenues.
+            </p>
+
+            <div class="d-flex flex-wrap gap-4 pt-3 border-top border-success-subtle text-white">
+                <div>
+                    <div class="text-white-50 small">Périodicité</div>
+                    <div class="fs-5 fw-bold">{{ campagne.periodiciteLabel }}</div>
+                </div>
+                <div class="vr bg-light opacity-25"></div>
+                <div>
+                    <div class="text-white-50 small">Jour de séance</div>
+                    <div class="fs-5 fw-bold">{{ campagne.jourRencontre }}</div>
+                </div>
+                <div class="vr bg-light opacity-25"></div>
+                <div>
+                    <div class="text-white-50 small">Part fixe Calebasse</div>
+                    <div class="fs-5 fw-bold text-warning">{{ campagne.montantFixe }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Boîte de règles de Caisse & Amendes -->
+            <div class="p-3 rounded-4" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(221, 161, 94, 0.3);">
+                <div class="text-warning fw-bold small text-uppercase mb-2">
+                    <i class="bi bi-shield-check me-1"></i> Barème Caisse Sociale
+                </div>
+                <div class="d-flex justify-content-between py-1 small border-bottom border-light border-opacity-10">
+                    <span class="text-light opacity-75">Cotisation Présente :</span>
+                    <strong class="text-white">+ {{ campagne.montantCaissePresent }}</strong>
+                </div>
+                <div class="d-flex justify-content-between py-1 small border-bottom border-light border-opacity-10">
+                    <span class="text-light opacity-75">Cotisation Absente excusée :</span>
+                    <strong class="text-warning">+ {{ campagne.montantCaisseAbsent }}</strong>
+                </div>
+                <div class="d-flex justify-content-between py-1 small">
+                    <span class="text-light opacity-75">Amende retard (par jour) :</span>
+                    <strong class="text-danger-emphasis bg-danger-subtle px-2 rounded">{{ campagne.amendeJournaliere }}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 1 : Calendrier des Séances de Cotisation -->
+<div class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="fw-bold mb-0">Séances Hebdomadaires de Cotisation</h3>
+            <p class="text-muted small mb-0">Registre chronologique des réunions et des montants scellés</p>
+        </div>
+        <span class="badge bg-dark rounded-pill px-3 py-2">{{ seances|length }} séances enregistrées</span>
+    </div>
+
+    <div class="row g-3">
+        {% for s in seances %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card card-teranga h-100 p-4 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill">
+                            <i class="bi bi-calendar-event me-1"></i> {{ s.jourNom }}
+                        </span>
+                        <span class="fw-bold text-dark fs-6">{{ s.dateFormatted }}</span>
+                    </div>
+
+                    <div class="text-muted small text-uppercase fw-bold letter-spacing-1">Total Scellé en Séance</div>
+                    <div class="montant-geant text-success my-2" style="font-size: 1.85rem;">
+                        {{ s.grandTotal }}
+                    </div>
+
+                    <div class="p-2 rounded-3 my-3" style="background-color: var(--fond-ecru);">
+                        <div class="d-flex justify-content-between small py-1">
+                            <span class="text-muted">Épargne Calebasse :</span>
+                            <strong class="text-dark">{{ s.totalEpargne }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between small py-1">
+                            <span class="text-muted">Caisse Sociale :</span>
+                            <strong class="text-dark">{{ s.totalCaisse }}</strong>
+                        </div>
+                        {% if s.nbAbsentsNonPayes > 0 %}
+                            <div class="d-flex justify-content-between small py-1 text-danger">
+                                <span>Amendes générées :</span>
+                                <strong>{{ s.totalAmendes }}</strong>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex justify-content-between small text-muted mb-3">
+                        <span><i class="bi bi-check-circle-fill text-success me-1"></i>{{ s.nbPresents }} prés.</span>
+                        <span><i class="bi bi-envelope-paper-fill text-warning me-1"></i>{{ s.nbAbsentsAvecFonds }} exc.</span>
+                        <span><i class="bi bi-x-circle-fill text-danger me-1"></i>{{ s.nbAbsentsNonPayes }} abs.</span>
+                    </div>
+
+                    <a href="{{ path('app_campagne_seance_show', {id: campagne.id, date: s.dateRaw}) }}" class="btn btn-teranga-primary w-100 mt-auto d-flex justify-content-center align-items-center gap-2">
+                        <span>Cérémonie de Cotisation</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-12">
+                <div class="card card-teranga p-4 text-center text-muted">
+                    Aucune séance n'a encore été enregistrée pour cette campagne.
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Section 2 : Membres Adhérentes de la Campagne -->
+<div>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="fw-bold mb-0">Adhérentes Inscrites ({{ participants|length }})</h3>
+            <p class="text-muted small mb-0">Engagements individuels et cumuls d'épargne</p>
+        </div>
+    </div>
+
+    <div class="card card-teranga p-0 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background-color: var(--fond-ecru);">
+                    <tr>
+                        <th class="ps-4">Membre</th>
+                        <th>Téléphone</th>
+                        <th>Rôle au Bureau</th>
+                        <th>Mode de Versement</th>
+                        <th>Épargne Cumulée</th>
+                        <th>Cotisation Caisse</th>
+                        <th class="text-center">État Pénalités</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in participants %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="avatar-rond" style="width: 38px; height: 38px; font-size: 0.85rem;">
+                                        {{ p.initiales }}
+                                    </div>
+                                    <strong class="text-dark">{{ p.nomComplet }}</strong>
+                                </div>
+                            </td>
+                            <td class="text-muted small">{{ p.telephone }}</td>
+                            <td>
+                                <span class="badge bg-success-subtle text-success small">
+                                    {{ p.fonction|default('Adhérente') }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge {% if p.isLibre %}bg-info-subtle text-info{% else %}bg-secondary-subtle text-secondary{% endif %}">
+                                    {{ p.modeAdhesion }}
+                                </span>
+                            </td>
+                            <td><strong class="text-success">{{ p.totalEpargneVerse }}</strong></td>
+                            <td class="text-muted">{{ p.totalCaisseVerse }}</td>
+                            <td class="text-center">
+                                {% if p.aAmendeImpayee %}
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                        <i class="bi bi-exclamation-octagon me-1"></i> Amende en attente
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                        <i class="bi bi-check-lg me-1"></i> À jour
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
