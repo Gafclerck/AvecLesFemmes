@@ -3,12 +3,16 @@
 namespace App\Entity;
 
 use App\Repository\PretRepository;
+use App\Trait\DateTimeTrait;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PretRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Pret
 {
+    use DateTimeTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
