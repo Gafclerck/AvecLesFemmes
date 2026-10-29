@@ -1,0 +1,206 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ groupement.nom }} — Calebasses Teranga{% endblock %}
+
+{% block body %}
+<!-- Fil d'Ariane -->
+<nav class="breadcrumb-teranga" aria-label="breadcrumb">
+    <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a href="{{ path('app_groupement_index') }}"><i class="bi bi-house-door-fill me-1"></i>Accueil</a></li>
+        <li class="breadcrumb-item"><a href="{{ path('app_groupement_index') }}">Groupements</a></li>
+        <li class="breadcrumb-item active text-dark" aria-current="page">{{ groupement.nom }}</li>
+    </ol>
+</nav>
+
+<!-- En-tête Groupement & Caisse Sociale -->
+<div class="row g-4 mb-4">
+    <!-- Fiche d'identité -->
+    <div class="col-lg-7">
+        <div class="card card-teranga p-4 h-100">
+            <div class="d-flex align-items-start gap-3">
+                <div class="avatar-rond avatar-rond-lg">
+                    {{ groupement.initiales }}
+                </div>
+                <div class="flex-grow-1">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <h2 class="fw-bold mb-0 text-dark">{{ groupement.nom }}</h2>
+                        {% if groupement.exerciceEnCours %}
+                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-2">
+                                <i class="bi bi-clock-history me-1"></i> {{ groupement.exerciceEnCours.statutLabel }}
+                            </span>
+                        {% endif %}
+                    </div>
+                    <p class="text-muted mt-2 mb-3">
+                        {{ groupement.description|default('Groupement solidaire d\'épargne et d\'entraide communautaire.') }}
+                    </p>
+                    <div class="d-flex flex-wrap gap-3 text-muted small">
+                        <span><i class="bi bi-geo-alt-fill text-danger me-1"></i>Région de Thiès</span>
+                        <span><i class="bi bi-people-fill text-primary me-1"></i><strong>{{ groupement.membres|length }}</strong> membres déclarées</span>
+                        <span><i class="bi bi-activity text-warning me-1"></i><strong>{{ groupement.campagnes|length }}</strong> campagnes ouvertes</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cycle budgétaire actif -->
+            {% if groupement.exerciceEnCours %}
+                <div class="mt-4 p-3 rounded-3" style="background-color: var(--fond-ecru); border-left: 4px solid var(--vert-calebasse);">
+                    <div class="fw-bold text-dark d-flex align-items-center gap-2">
+                        <i class="bi bi-calendar-event-fill text-success"></i>
+                        <span>{{ groupement.exerciceEnCours.labelPeriode }}</span>
+                    </div>
+                    <div class="d-flex flex-wrap gap-4 mt-2 text-muted small">
+                        {% if groupement.exerciceEnCours.dateLimitePret %}
+                            <span>Limite des prêts : <strong>{{ groupement.exerciceEnCours.dateLimitePret }}</strong></span>
+                        {% endif %}
+                        {% if groupement.exerciceEnCours.dateRetribution %}
+                            <span>Rétribution / Partage : <strong>{{ groupement.exerciceEnCours.dateRetribution }}</strong></span>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Caisse Sociale / Fonds de secours -->
+    <div class="col-lg-5">
+        <div class="card card-teranga p-4 h-100" style="background: linear-gradient(145deg, #FFFFFF 0%, var(--or-souki-light) 100%);">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="badge badge-gold text-uppercase">Caisse Sociale & Secours</span>
+                <i class="bi bi-safe2-fill fs-3 text-warning"></i>
+            </div>
+
+            <div class="text-muted small text-uppercase fw-bold letter-spacing-1 mt-2">Solde Total Disponible</div>
+            <div class="montant-geant text-success my-2">
+                {{ groupement.soldeCaisseSociale }}
+            </div>
+            <p class="text-muted small mb-3">Réserve d'urgence alimentée par les cotisations solidaires et les pénalités.</p>
+
+            <div class="border-top border-warning-subtle pt-3">
+                <div class="d-flex justify-content-between py-1 small">
+                    <span class="text-muted"><i class="bi bi-check2-circle text-success me-1"></i>Cotisations présence :</span>
+                    <strong class="text-dark">{{ groupement.totalCotisationsCaisse }}</strong>
+                </div>
+                <div class="d-flex justify-content-between py-1 small">
+                    <span class="text-muted"><i class="bi bi-exclamation-triangle-fill text-danger me-1"></i>Amendes de retard :</span>
+                    <strong class="text-dark">{{ groupement.totalAmendes }}</strong>
+                </div>
+                <div class="d-flex justify-content-between py-1 small">
+                    <span class="text-muted"><i class="bi bi-percent text-info me-1"></i>Intérêts des prêts :</span>
+                    <strong class="text-dark">{{ groupement.totalInterets }}</strong>
+                </div>
+                <div class="d-flex justify-content-between py-1 small">
+                    <span class="text-muted"><i class="bi bi-tools text-secondary me-1"></i>Locations matériels :</span>
+                    <strong class="text-dark">{{ groupement.totalLocations }}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Activités Financières / Campagnes du Groupement -->
+<div class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="fw-bold mb-0">Activités Financières (Campagnes)</h3>
+            <p class="text-muted small mb-0">Calebasse d'épargne hebdomadaire et tontines rotatives</p>
+        </div>
+        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-2">
+            {{ groupement.campagnes|length }} campagnes en cours
+        </span>
+    </div>
+
+    <div class="row g-3">
+        {% for c in groupement.campagnes %}
+            <div class="col-md-6">
+                <div class="card card-teranga p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <span class="badge {% if c.type == 'Tontine' %}badge-terre{% else %}badge-vert{% endif %} mb-2">
+                                {{ c.type }}
+                            </span>
+                            <h4 class="fw-bold mb-0 text-dark">{{ c.nom }}</h4>
+                        </div>
+                        <div class="avatar-rond" style="width: 40px; height: 40px; font-size: 0.9rem;">
+                            {{ c.type|slice(0, 2)|upper }}
+                        </div>
+                    </div>
+
+                    <div class="my-3 py-2 px-3 rounded-3" style="background-color: var(--fond-ecru);">
+                        <div class="row g-2 text-center">
+                            <div class="col-4 border-end">
+                                <div class="text-muted small">Part fixe</div>
+                                <div class="fw-bold text-dark">{{ c.montantFixe }}</div>
+                            </div>
+                            <div class="col-4 border-end">
+                                <div class="text-muted small">Rencontre</div>
+                                <div class="fw-bold text-dark">{{ c.jourRencontre }}</div>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-muted small">Amende/j</div>
+                                <div class="fw-bold text-danger">{{ c.amendeJournaliere }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between text-muted small mb-3">
+                        <span><i class="bi bi-people-fill text-primary me-1"></i><strong>{{ c.nombreMembres }}</strong> adhérentes inscrites</span>
+                        <span><i class="bi bi-calendar3 me-1"></i>Périodicité <strong>{{ c.periodiciteLabel }}</strong></span>
+                    </div>
+
+                    <a href="{{ path('app_campagne_show', {id: c.id}) }}" class="btn btn-teranga-outline w-100 d-flex justify-content-center align-items-center gap-2 mt-auto">
+                        <span>Accéder aux séances et adhérentes</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-12">
+                <div class="card card-teranga p-4 text-center text-muted">
+                    Aucune campagne enregistrée pour ce groupement.
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Bureau & Membres du Groupement -->
+<div>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="fw-bold mb-0">Bureau et Membres Adhérentes</h3>
+            <p class="text-muted small mb-0">Gouvernance locale et responsabilité de gestion</p>
+        </div>
+        <span class="badge bg-dark rounded-pill px-3 py-2">{{ groupement.membres|length }} membres</span>
+    </div>
+
+    <div class="row g-3">
+        {% for m in groupement.membres %}
+            <div class="col-md-4">
+                <div class="card card-teranga p-3 h-100">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="avatar-rond">
+                            {{ m.initiales }}
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-baseline">
+                                <h6 class="fw-bold mb-0 text-dark">{{ m.nomComplet }}</h6>
+                                {% if m.isGroupOwner %}
+                                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" title="Propriétaire / Leader">
+                                        <i class="bi bi-star-fill"></i> Leader
+                                    </span>
+                                {% endif %}
+                            </div>
+                            <span class="badge bg-success-subtle text-success small my-1">
+                                {{ m.fonctionLabel }}
+                            </span>
+                            <div class="text-muted small mt-1">
+                                <i class="bi bi-telephone-fill me-1"></i>{{ m.telephone }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
