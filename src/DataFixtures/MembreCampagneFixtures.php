@@ -12,6 +12,8 @@ use Doctrine\Persistence\ObjectManager;
 
 class MembreCampagneFixtures extends Fixture implements DependentFixtureInterface
 {
+    public const REFERENCE_PREFIX = 'adhesion-';
+
     public function load(ObjectManager $manager): void
     {
         $classes = ['tontine' => Tontine::class, 'epargne' => Epargne::class];
@@ -32,6 +34,7 @@ class MembreCampagneFixtures extends Fixture implements DependentFixtureInterfac
                     $membreCampagne->setIsLibre($index % 2 === 0);
 
                     $manager->persist($membreCampagne);
+                    $this->addReference(self::REFERENCE_PREFIX . $g . '-' . $type . '-' . $position, $membreCampagne);
                 }
             }
         }
