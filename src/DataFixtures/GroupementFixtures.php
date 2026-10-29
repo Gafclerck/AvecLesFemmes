@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\CaisseSociale;
 use App\Entity\Groupement;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -9,6 +10,7 @@ use Doctrine\Persistence\ObjectManager;
 class GroupementFixtures extends Fixture
 {
     public const REFERENCE_PREFIX = 'groupement-';
+    public const CAISSE_PREFIX = 'caisse-';
 
     public function load(ObjectManager $manager): void
     {
@@ -21,16 +23,23 @@ class GroupementFixtures extends Fixture
         ];
 
         foreach ($donnees as $index => [$nom, $description]) {
-            $maintenant = new \DateTimeImmutable();
-
             $groupement = new Groupement();
             $groupement->setNom($nom);
             $groupement->setDescription($description);
-            $groupement->setCreatedAt($maintenant);
-            $groupement->setUpdatedAt($maintenant);
+
+            $caisse = new CaisseSociale();
+            $caisse->setGroupement($groupement);
+            $caisse->setSoldeTotal('0.00');
+            $caisse->setTotalCotisationsCaisse('0.00');
+            $caisse->setTotalAmendes('0.00');
+            $caisse->setTotalInterets('0.00');
+            $caisse->setTotalLocations('0.00');
 
             $manager->persist($groupement);
+            $manager->persist($caisse);
+
             $this->addReference(self::REFERENCE_PREFIX . $index, $groupement);
+            $this->addReference(self::CAISSE_PREFIX . $index, $caisse);
         }
 
         $manager->flush();
