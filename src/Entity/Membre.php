@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\Fonction;
 use App\Repository\MembreRepository;
 use App\Trait\DateTimeTrait;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -19,11 +20,11 @@ class Membre
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 50)]
-    private ?string $fonction = null;
+    #[ORM\Column(length: 50, nullable: true, enumType: Fonction::class)]
+    private ?Fonction $fonction = null;
 
     #[ORM\Column]
-    private ?bool $isGroupeOwner = null;
+    private ?bool $isGroupeOwner = false;
 
     #[ORM\OneToOne(inversedBy: 'membre', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
@@ -42,6 +43,7 @@ class Membre
     public function __construct()
     {
         $this->membreCampagnes = new ArrayCollection();
+        $this->isGroupeOwner = false;
     }
 
     public function getId(): ?int
@@ -49,14 +51,18 @@ class Membre
         return $this->id;
     }
 
-    public function getFonction(): ?string
+    public function getFonction(): ?Fonction
     {
         return $this->fonction;
     }
 
-    public function setFonction(string $fonction): static
+    public function setFonction(Fonction|string|null $fonction): static
     {
-        $this->fonction = $fonction;
+        if (is_string($fonction)) {
+            $this->fonction = Fonction::tryFrom($fonction);
+        } else {
+            $this->fonction = $fonction;
+        }
 
         return $this;
     }
@@ -73,6 +79,17 @@ class Membre
         return $this;
     }
 
+    // Alias for schema compatibility
+    public function isGroupOwner(): ?bool
+    {
+        return $this->isGroupeOwner();
+    }
+
+    public function setIsGroupOwner(bool $isGroupOwner): static
+    {
+        return $this->setIsGroupeOwner($isGroupOwner);
+    }
+
     public function getCompte(): ?User
     {
         return $this->compte;
@@ -83,6 +100,17 @@ class Membre
         $this->compte = $compte;
 
         return $this;
+    }
+
+    // Alias for user relation
+    public function getUser(): ?User
+    {
+        return $this->getCompte();
+    }
+
+    public function setUser(User $user): static
+    {
+        return $this->setCompte($user);
     }
 
     /**
