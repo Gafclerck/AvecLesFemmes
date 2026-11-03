@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Cérémonie de Cotisation ({{ seance.dateFormatted }}) — Calebasses Teranga{% endblock %}
+{% block title %}Séance du {{ seance.dateFormatted }} — {{ campagne.nom }}{% endblock %}
 
 {% block body %}
 <!-- Fil d'Ariane -->
@@ -13,40 +13,40 @@
     </ol>
 </nav>
 
-<!-- Zone 1 : Bilan Vivant de la Séance -->
-<div class="card card-teranga p-4 p-md-5 mb-5 border-0 shadow-sm" style="background: linear-gradient(135deg, #0B4F30 0%, #073822 100%); color: #FFFFFF;">
+<!-- Bilan Financier de la Séance (KPIs Épurés) -->
+<div class="card card-teranga p-4 p-md-5 mb-5 border-0 shadow-sm" style="background: linear-gradient(135deg, var(--vert-calebasse) 0%, var(--vert-calebasse-dark) 100%); color: #FFFFFF;">
     <div class="row align-items-center g-4">
-        <div class="col-lg-7">
+        <div class="col-lg-6">
             <span class="badge badge-gold mb-2 text-uppercase px-3 py-2">
                 <i class="bi bi-calendar2-check-fill me-1"></i> {{ seance.jourNom }} {{ seance.dateFormatted }}
             </span>
-            <div class="text-white-50 text-uppercase fw-bold letter-spacing-1 small">Total Recueilli lors de la Cérémonie</div>
-            <div class="montant-geant text-warning my-2" style="font-size: clamp(2.5rem, 5vw, 3.8rem); color: var(--or-souki) !important;">
+            <div class="text-white-50 text-uppercase fw-bold letter-spacing-1 small">Total Recueilli lors de la Séance</div>
+            <div class="montant-geant text-warning my-2" style="font-size: clamp(2.4rem, 4.5vw, 3.4rem); color: var(--or-souki) !important;">
                 {{ seance.grandTotal }}
             </div>
-            <p class="text-light opacity-75 mb-0">
-                Versements enregistrés et validés sous le contrôle de la Présidente et de la Trésorière du groupement.
+            <p class="text-light opacity-75 mb-0" style="max-width: 480px;">
+                Versements enregistrés sous le contrôle de la Présidente et de la Trésorière pour la campagne <strong>{{ campagne.nom }}</strong>.
             </p>
         </div>
 
-        <div class="col-lg-5">
-            <div class="row g-2">
-                <div class="col-6">
-                    <div class="p-3 rounded-3" style="background: rgba(255, 255, 255, 0.08);">
+        <div class="col-lg-6">
+            <div class="row g-3">
+                <div class="col-sm-4">
+                    <div class="p-3 rounded-3 text-center" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.1);">
                         <div class="text-white-50 small">Épargne Calebasse</div>
-                        <div class="fs-5 fw-bold text-white">{{ seance.totalEpargne }}</div>
+                        <div class="fs-5 fw-bold text-white mt-1">{{ seance.totalEpargne }}</div>
                     </div>
                 </div>
-                <div class="col-6">
-                    <div class="p-3 rounded-3" style="background: rgba(255, 255, 255, 0.08);">
+                <div class="col-sm-4">
+                    <div class="p-3 rounded-3 text-center" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.1);">
                         <div class="text-white-50 small">Caisse Sociale</div>
-                        <div class="fs-5 fw-bold text-warning">{{ seance.totalCaisse }}</div>
+                        <div class="fs-5 fw-bold text-warning mt-1">{{ seance.totalCaisse }}</div>
                     </div>
                 </div>
-                <div class="col-12">
-                    <div class="p-3 rounded-3 d-flex justify-content-between align-items-center" style="background: rgba(188, 108, 37, 0.25); border: 1px dashed var(--or-souki);">
-                        <span class="small text-white"><i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>Total Amendes de retard :</span>
-                        <strong class="fs-6 text-white">{{ seance.totalAmendes }}</strong>
+                <div class="col-sm-4">
+                    <div class="p-3 rounded-3 text-center" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.1);">
+                        <div class="text-white-50 small">Total Amendes</div>
+                        <div class="fs-5 fw-bold text-danger-emphasis mt-1">{{ seance.totalAmendes }}</div>
                     </div>
                 </div>
             </div>
@@ -54,18 +54,18 @@
     </div>
 </div>
 
-<!-- Zone 2 : Grille Tactile des Membres (Appel & Présence) -->
+<!-- Registre de Séance & Appel des Membres sous forme de TABLEAU -->
 <div class="mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <div>
-            <h3 class="fw-bold mb-0">Appel des Membres & Cérémonie de Cotisation</h3>
-            <p class="text-muted small mb-0">Validation tactile des présences et des versements</p>
+            <h3 class="fw-bold mb-0">Registre des Cotisations de Séance</h3>
+            <p class="text-muted small mb-0">Appel nominal et comptabilisation des versements par adhérente</p>
         </div>
         <div class="d-flex gap-2">
             <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-2">
                 🟢 {{ seance.nbPresents }} Présentes
             </span>
-            <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-3 py-2">
+            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-3 py-2">
                 🟡 {{ seance.nbAbsentsAvecFonds }} Excusées (+fonds)
             </span>
             {% if seance.nbAbsentsNonPayes > 0 %}
@@ -76,101 +76,100 @@
         </div>
     </div>
 
-    <div class="row g-4">
-        {% for c in seance.cotisations %}
-            <div class="col-md-6 col-lg-4">
-                <div class="card card-teranga h-100 p-4 {% if c.statutPresence == 'ABSENT_NON_PAYE' %}border-danger border-2{% endif %}">
-                    <div class="d-flex align-items-start gap-3 mb-3">
-                        <div class="avatar-rond" style="width: 54px; height: 54px; font-size: 1.25rem;">
-                            {{ c.initiales }}
-                        </div>
-                        <div class="flex-grow-1">
-                            <h5 class="fw-bold mb-0 text-dark">{{ c.membreNom }}</h5>
-                            <span class="badge bg-secondary-subtle text-secondary small">{{ c.fonction|default('Adhérente active') }}</span>
-                            <div class="text-muted small mt-1"><i class="bi bi-phone me-1"></i>{{ c.telephone }}</div>
-                        </div>
-                    </div>
-
-                    <!-- Badge de Présence Tactile (Basé sur Backed Enum) -->
-                    <div class="mb-3">
-                        {% if c.statutPresence == 'PRESENT' %}
-                            <div class="p-2 rounded-3 text-center bg-success-subtle text-success border border-success-subtle fw-bold">
-                                <i class="bi bi-check-circle-fill me-1"></i> Présente physiquement
-                            </div>
-                        {% elseif c.statutPresence == 'ABSENT_AVEC_FONDS' %}
-                            <div class="p-2 rounded-3 text-center bg-warning-subtle text-warning-emphasis border border-warning-subtle fw-bold">
-                                <i class="bi bi-envelope-check-fill me-1"></i> Absente (fonds envoyés par tiers)
-                            </div>
-                        {% else %}
-                            <div class="p-2 rounded-3 text-center bg-danger-subtle text-danger border border-danger-subtle fw-bold">
-                                <i class="bi bi-x-circle-fill me-1"></i> Absente non payée (Pénalité)
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <!-- Détail du versement -->
-                    <div class="p-3 rounded-3 my-auto" style="background-color: var(--fond-ecru);">
-                        <div class="d-flex justify-content-between small py-1">
-                            <span class="text-muted">Épargne Calebasse :</span>
-                            <strong class="text-dark">{{ c.montantEpargne }}</strong>
-                        </div>
-                        <div class="d-flex justify-content-between small py-1">
-                            <span class="text-muted">Cotisation Caisse :</span>
-                            <strong class="text-dark">{{ c.montantCaisse }}</strong>
-                        </div>
-                        <div class="d-flex justify-content-between small py-1 border-top border-secondary-subtle mt-1 pt-1">
-                            <span class="fw-bold text-dark">Total versé :</span>
-                            <strong class="text-success fs-6">{{ c.montantTotal }}</strong>
-                        </div>
-                    </div>
-
-                    <!-- Bloc Amende si déclenchée -->
-                    {% if c.aAmende %}
-                        <div class="mt-3 p-2 rounded-3 border border-danger-subtle bg-danger-subtle text-danger small">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span><i class="bi bi-exclamation-triangle-fill me-1"></i>Pénalité journalière ({{ c.amendeJours }}j) :</span>
-                                <strong class="fs-6">{{ c.amendeMontant }}</strong>
-                            </div>
-                            <div class="mt-1">
-                                {% if c.amendePayee %}
-                                    <span class="badge bg-success text-white"><i class="bi bi-check-lg me-1"></i>Amende réglée</span>
+    <div class="table-teranga-wrapper">
+        <div class="table-responsive">
+            <table class="table table-teranga table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th class="ps-4">#</th>
+                        <th>Adhérente</th>
+                        <th>Rôle au Bureau</th>
+                        <th>Statut Présence</th>
+                        <th>Épargne Calebasse</th>
+                        <th>Cotisation Caisse</th>
+                        <th>Total Versé</th>
+                        <th class="pe-4">Pénalité / Amende</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in seance.cotisations %}
+                        <tr class="{% if c.statutPresence == 'ABSENT_NON_PAYE' %}table-danger table-opacity-25{% endif %}">
+                            <td class="ps-4 text-muted fw-bold">{{ loop.index }}</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="avatar-rond" style="width: 36px; height: 36px; font-size: 0.85rem;">
+                                        {{ c.initiales }}
+                                    </div>
+                                    <div>
+                                        <strong class="text-dark d-block">{{ c.membreNom }}</strong>
+                                        <small class="text-muted font-monospace">{{ c.telephone }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary-subtle text-secondary small">
+                                    {{ c.fonction|default('Adhérente') }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if c.statutPresence == 'PRESENT' %}
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                                        <i class="bi bi-check-circle-fill me-1"></i> Présente
+                                    </span>
+                                {% elseif c.statutPresence == 'ABSENT_AVEC_FONDS' %}
+                                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1">
+                                        <i class="bi bi-envelope-check-fill me-1"></i> Excusée (+fonds)
+                                    </span>
                                 {% else %}
-                                    <span class="badge bg-danger text-white"><i class="bi bi-hourglass-split me-1"></i>En attente de paiement</span>
+                                    <span class="badge bg-danger text-white px-2 py-1">
+                                        <i class="bi bi-x-circle-fill me-1"></i> Absente non payée
+                                    </span>
                                 {% endif %}
-                            </div>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        {% endfor %}
-    </div>
-</div>
-
-<!-- Zone 3 : Validation & Sceau de Clôture -->
-<div class="card card-teranga p-4 mb-5 text-center" style="background: linear-gradient(135deg, #FEFAE0 0%, #FFFFFF 100%); border: 2px dashed var(--vert-calebasse);">
-    <div class="py-3">
-        <span class="fs-1">🔐</span>
-        <h3 class="fw-bold mt-2 mb-1 text-dark">Séance Validée et Scellée dans la Calebasse</h3>
-        <p class="text-muted mb-3" style="max-width: 600px; margin: 0 auto;">
-            Les comptes de cette journée ont été certifiés conformément aux règles du groupement. Aucune modification manuelle n'est autorisée après scellement.
-        </p>
-
-        <div class="sceau-confiance mb-3">
-            <i class="bi bi-patch-check-fill fs-3 text-success"></i>
-            <div class="text-start">
-                <div class="fw-bold text-success text-uppercase small">Sceau Officiel de Conformité</div>
-                <div class="small text-muted">Certifié par la Trésorière & Présidente • Date serveur : {{ seance.dateFormatted }} 16:30:00</div>
-            </div>
+                            </td>
+                            <td>
+                                <span class="fw-semibold text-dark">{{ c.montantEpargne }}</span>
+                            </td>
+                            <td>
+                                <span class="text-muted">{{ c.montantCaisse }}</span>
+                            </td>
+                            <td>
+                                <strong class="text-success fs-6">{{ c.montantTotal }}</strong>
+                            </td>
+                            <td class="pe-4">
+                                {% if c.aAmende %}
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                            {{ c.amendeMontant }} ({{ c.amendeJours }}j)
+                                        </span>
+                                        {% if c.amendePayee %}
+                                            <span class="badge bg-success text-white small" title="Amende réglée">
+                                                <i class="bi bi-check-lg"></i> Réglée
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-danger text-white small" title="Paiement en attente">
+                                                <i class="bi bi-hourglass-split"></i> En attente
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                {% else %}
+                                    <span class="text-muted small">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 
-<!-- Zone 4 : Passeport de Confiance (Reçu Officiel & Partage WhatsApp) -->
+<!-- Passeport de Confiance : Reçu Officiel & Partage WhatsApp -->
 <div class="card card-teranga p-4 p-md-5 mb-5 shadow-sm">
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
-            <span class="badge badge-gold mb-1">Preuve Sociale & Traçabilité</span>
+            <span class="badge badge-gold mb-1 text-uppercase">Traçabilité & Preuve Sociale</span>
             <h3 class="fw-bold mb-0 text-dark">Passeport de Confiance — Reçu de Séance</h3>
+            <p class="text-muted small mb-0">Partage officiel instantané des montants scellés lors de la réunion</p>
         </div>
         <div>
             <a href="https://api.whatsapp.com/send?text={{ ('Reçu Officiel Calebasses - ' ~ campagne.nom ~ ' - Séance du ' ~ seance.dateFormatted ~ ' : Total collecté ' ~ seance.grandTotal ~ ' scellé dans la Calebasse.')|url_encode }}" 
@@ -182,8 +181,8 @@
         </div>
     </div>
 
-    <!-- Reçu Stylisé -->
-    <div class="p-4 rounded-4" style="background-color: var(--fond-ecru); border: 2px solid var(--border-color); max-width: 700px; margin: 0 auto;">
+    <!-- Reçu Stylisé Épuré -->
+    <div class="p-4 rounded-4" style="background-color: var(--fond-ecru); border: 2px solid var(--border-color); max-width: 680px; margin: 0 auto;">
         <div class="text-center pb-3 border-bottom border-dark border-opacity-10">
             <div class="fs-3">🍯</div>
             <h4 class="fw-bold mb-0 text-dark">REÇU OFFICIEL DE COTISATION</h4>
