@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ groupement.nom }} — Calebasses Teranga{% endblock %}
+{% block title %}{{ groupement.nom }} — Calebasses{% endblock %}
 
 {% block body %}
 <!-- Fil d'Ariane -->
@@ -12,9 +12,9 @@
     </ol>
 </nav>
 
-<!-- En-tête Groupement & Caisse Sociale -->
-<div class="row g-4 mb-4">
-    <!-- Fiche d'identité -->
+<!-- En-tête Groupement & Caisse Sociale (Synthèse binaire nette) -->
+<div class="row g-4 mb-5">
+    <!-- Fiche d'identité du groupement -->
     <div class="col-lg-7">
         <div class="card card-teranga p-4 h-100">
             <div class="d-flex align-items-start gap-3">
@@ -34,9 +34,9 @@
                         {{ groupement.description|default('Groupement solidaire d\'épargne et d\'entraide communautaire.') }}
                     </p>
                     <div class="d-flex flex-wrap gap-3 text-muted small">
-                        <span><i class="bi bi-geo-alt-fill text-danger me-1"></i>Région de Thiès</span>
-                        <span><i class="bi bi-people-fill text-primary me-1"></i><strong>{{ groupement.membres|length }}</strong> membres déclarées</span>
-                        <span><i class="bi bi-activity text-warning me-1"></i><strong>{{ groupement.campagnes|length }}</strong> campagnes ouvertes</span>
+                        <span><i class="bi bi-geo-alt-fill text-danger me-1"></i>Région de Thiès / Dakar</span>
+                        <span><i class="bi bi-people-fill text-primary me-1"></i><strong>{{ groupement.membres|length }}</strong> membres</span>
+                        <span><i class="bi bi-activity text-warning me-1"></i><strong>{{ groupement.campagnes|length }}</strong> activités financières</span>
                     </div>
                 </div>
             </div>
@@ -73,7 +73,7 @@
             <div class="montant-geant text-success my-2">
                 {{ groupement.soldeCaisseSociale }}
             </div>
-            <p class="text-muted small mb-3">Réserve d'urgence alimentée par les cotisations solidaires et les pénalités.</p>
+            <p class="text-muted small mb-3">Fonds communautaire de réserve pour imprévus, santé et cérémonies.</p>
 
             <div class="border-top border-warning-subtle pt-3">
                 <div class="d-flex justify-content-between py-1 small">
@@ -97,110 +97,156 @@
     </div>
 </div>
 
-<!-- Activités Financières / Campagnes du Groupement -->
+<!-- Section 1 : Activités Financières (Campagnes) sous forme de TABLEAU -->
 <div class="mb-5">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
             <h3 class="fw-bold mb-0">Activités Financières (Campagnes)</h3>
-            <p class="text-muted small mb-0">Calebasse d'épargne hebdomadaire et tontines rotatives</p>
+            <p class="text-muted small mb-0">Calebasse d'épargne hebdomadaire et tontines rotatives du groupement</p>
         </div>
         <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-2">
-            {{ groupement.campagnes|length }} campagnes en cours
+            {{ groupement.campagnes|length }} activités ouvertes
         </span>
     </div>
 
-    <div class="row g-3">
-        {% for c in groupement.campagnes %}
-            <div class="col-md-6">
-                <div class="card card-teranga p-4 h-100">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <div>
-                            <span class="badge {% if c.type == 'Tontine' %}badge-terre{% else %}badge-vert{% endif %} mb-2">
-                                {{ c.type }}
-                            </span>
-                            <h4 class="fw-bold mb-0 text-dark">{{ c.nom }}</h4>
-                        </div>
-                        <div class="avatar-rond" style="width: 40px; height: 40px; font-size: 0.9rem;">
-                            {{ c.type|slice(0, 2)|upper }}
-                        </div>
-                    </div>
-
-                    <div class="my-3 py-2 px-3 rounded-3" style="background-color: var(--fond-ecru);">
-                        <div class="row g-2 text-center">
-                            <div class="col-4 border-end">
-                                <div class="text-muted small">Part fixe</div>
-                                <div class="fw-bold text-dark">{{ c.montantFixe }}</div>
-                            </div>
-                            <div class="col-4 border-end">
-                                <div class="text-muted small">Rencontre</div>
-                                <div class="fw-bold text-dark">{{ c.jourRencontre }}</div>
-                            </div>
-                            <div class="col-4">
-                                <div class="text-muted small">Amende/j</div>
-                                <div class="fw-bold text-danger">{{ c.amendeJournaliere }}</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-between text-muted small mb-3">
-                        <span><i class="bi bi-people-fill text-primary me-1"></i><strong>{{ c.nombreMembres }}</strong> adhérentes inscrites</span>
-                        <span><i class="bi bi-calendar3 me-1"></i>Périodicité <strong>{{ c.periodiciteLabel }}</strong></span>
-                    </div>
-
-                    <a href="{{ path('app_campagne_show', {id: c.id}) }}" class="btn btn-teranga-outline w-100 d-flex justify-content-center align-items-center gap-2 mt-auto">
-                        <span>Accéder aux séances et adhérentes</span>
-                        <i class="bi bi-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-        {% else %}
-            <div class="col-12">
-                <div class="card card-teranga p-4 text-center text-muted">
-                    Aucune campagne enregistrée pour ce groupement.
-                </div>
-            </div>
-        {% endfor %}
+    <div class="table-teranga-wrapper">
+        <div class="table-responsive">
+            <table class="table table-teranga table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Activité</th>
+                        <th>Type</th>
+                        <th>Rythme & Rencontre</th>
+                        <th>Part Calebasse</th>
+                        <th>Caisse Sociale</th>
+                        <th>Pénalité / jour</th>
+                        <th class="text-center">Adhérentes</th>
+                        <th class="text-end pe-4">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in groupement.campagnes %}
+                        <tr>
+                            <td class="ps-4">
+                                <strong class="text-dark fs-6 d-block">{{ c.nom }}</strong>
+                                <small class="text-muted">Période : {{ c.dateDebut }} - {{ c.dateFin }}</small>
+                            </td>
+                            <td>
+                                <span class="badge {% if c.type == 'Tontine' %}badge-terre{% else %}badge-vert{% endif %}">
+                                    {{ c.type }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="fw-semibold text-dark">{{ c.periodiciteLabel }}</div>
+                                <small class="text-muted">Jour : {{ c.jourRencontre }}</small>
+                            </td>
+                            <td>
+                                <strong class="text-success">{{ c.montantFixe }}</strong>
+                            </td>
+                            <td>
+                                <div class="small">Présente : <strong class="text-dark">{{ c.montantCaissePresent }}</strong></div>
+                                <div class="small text-muted">Excusée : {{ c.montantCaisseAbsent }}</div>
+                            </td>
+                            <td>
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                    {{ c.amendeJournaliere }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-light text-dark border px-2 py-1">
+                                    <i class="bi bi-people-fill text-primary me-1"></i>{{ c.nombreMembres }}
+                                </span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <a href="{{ path('app_campagne_show', {id: c.id}) }}" class="btn btn-teranga-outline btn-sm d-inline-flex align-items-center gap-1">
+                                    <span>Séances & Membres</span>
+                                    <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-muted">
+                                Aucune campagne enregistrée pour ce groupement.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
-<!-- Bureau & Membres du Groupement -->
+<!-- Section 2 : Bureau et Membres Adhérentes sous forme de TABLEAU -->
 <div>
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
             <h3 class="fw-bold mb-0">Bureau et Membres Adhérentes</h3>
-            <p class="text-muted small mb-0">Gouvernance locale et responsabilité de gestion</p>
+            <p class="text-muted small mb-0">Registre des adhérentes déclarées et des fonctions électives</p>
         </div>
         <span class="badge bg-dark rounded-pill px-3 py-2">{{ groupement.membres|length }} membres</span>
     </div>
 
-    <div class="row g-3">
-        {% for m in groupement.membres %}
-            <div class="col-md-4">
-                <div class="card card-teranga p-3 h-100">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="avatar-rond">
-                            {{ m.initiales }}
-                        </div>
-                        <div class="flex-grow-1">
-                            <div class="d-flex justify-content-between align-items-baseline">
-                                <h6 class="fw-bold mb-0 text-dark">{{ m.nomComplet }}</h6>
+    <div class="table-teranga-wrapper">
+        <div class="table-responsive">
+            <table class="table table-teranga table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th class="ps-4">#</th>
+                        <th>Adhérente</th>
+                        <th>Rôle au Bureau</th>
+                        <th>Responsabilité</th>
+                        <th>Téléphone</th>
+                        <th>Adresse / Quartier</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in groupement.membres %}
+                        <tr>
+                            <td class="ps-4 text-muted fw-bold">{{ loop.index }}</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="avatar-rond" style="width: 36px; height: 36px; font-size: 0.85rem;">
+                                        {{ m.initiales }}
+                                    </div>
+                                    <strong class="text-dark">{{ m.nomComplet }}</strong>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                    {{ m.fonctionLabel }}
+                                </span>
+                            </td>
+                            <td>
                                 {% if m.isGroupOwner %}
-                                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" title="Propriétaire / Leader">
-                                        <i class="bi bi-star-fill"></i> Leader
+                                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                                        <i class="bi bi-star-fill me-1"></i> Leader / Propriétaire
                                     </span>
+                                {% else %}
+                                    <span class="text-muted small">Adhérente</span>
                                 {% endif %}
-                            </div>
-                            <span class="badge bg-success-subtle text-success small my-1">
-                                {{ m.fonctionLabel }}
-                            </span>
-                            <div class="text-muted small mt-1">
-                                <i class="bi bi-telephone-fill me-1"></i>{{ m.telephone }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
+                            </td>
+                            <td>
+                                <span class="text-muted small font-monospace">
+                                    <i class="bi bi-telephone-fill text-secondary me-1"></i>{{ m.telephone }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="text-muted small">
+                                    {{ m.adresse|default('Non renseignée') }}
+                                </span>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">
+                                Aucune adhérente enregistrée dans ce groupement.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 {% endblock %}
