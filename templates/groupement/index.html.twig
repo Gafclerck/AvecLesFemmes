@@ -12,7 +12,7 @@
             </span>
             <div class="text-white-50 text-uppercase fw-bold letter-spacing-1 small">Solde Total des Caisses Sociales</div>
             <div class="montant-geant text-warning my-2" style="font-size: clamp(2.4rem, 4.5vw, 3.4rem); color: var(--or-souki) !important;">
-                {{ total_caisse }}
+                {{ stats.totalCaisse|default('0 FCFA') }}
             </div>
             <p class="text-light opacity-75 mb-0" style="max-width: 520px;">
                 Fonds de prévoyance et de solidarité communautaire alimenté par les cotisations de présence, pénalités et intérêts.
@@ -23,19 +23,19 @@
             <div class="row g-3">
                 <div class="col-sm-4">
                     <div class="p-3 rounded-3 text-center" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.1);">
-                        <div class="display-6 fw-bold text-white mb-1">{{ total_groupements }}</div>
+                        <div class="display-6 fw-bold text-white mb-1">{{ stats.totalGroupements|default(0) }}</div>
                         <div class="text-white-50 small">Groupements Actifs</div>
                     </div>
                 </div>
                 <div class="col-sm-4">
                     <div class="p-3 rounded-3 text-center" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.1);">
-                        <div class="display-6 fw-bold text-white mb-1">{{ total_membres }}</div>
+                        <div class="display-6 fw-bold text-white mb-1">{{ stats.totalMembres|default(0) }}</div>
                         <div class="text-white-50 small">Femmes Adhérentes</div>
                     </div>
                 </div>
                 <div class="col-sm-4">
                     <div class="p-3 rounded-3 text-center" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.1);">
-                        <div class="display-6 fw-bold text-warning mb-1">{{ total_campagnes }}</div>
+                        <div class="display-6 fw-bold text-warning mb-1">{{ stats.totalCampagnes|default(0) }}</div>
                         <div class="text-white-50 small">Activités Financières</div>
                     </div>
                 </div>
@@ -44,15 +44,43 @@
     </div>
 </div>
 
-<!-- Liste des Groupements en Tableau -->
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-        <h3 class="fw-bold mb-0">Groupements Enregistrés</h3>
-        <p class="text-muted small mb-0">Vue synthétique et détaillée de l'ensemble des groupements féminins</p>
+<!-- Barre d'Action & Formulaire de Recherche Dynamique (FormType & DTO) -->
+<div class="card card-teranga p-3 p-md-4 mb-4 border-0 shadow-sm" style="background-color: var(--fond-ecru);">
+    <div class="row align-items-center g-3">
+        <div class="col-md-5">
+            <h4 class="fw-bold mb-1 text-dark">Groupements Enregistrés</h4>
+            <p class="text-muted small mb-0">
+                {% if search.q is not empty %}
+                    Filtre actif : <span class="badge bg-dark rounded-pill">{{ search.q }}</span>
+                    ({{ pageDTO.totalElements }} résultat{{ pageDTO.totalElements > 1 ? 's' : '' }})
+                {% else %}
+                    Vue synthétique et pagination des groupements féminins
+                {% endif %}
+            </p>
+        </div>
+        <div class="col-md-7">
+            {{ form_start(form, {'attr': {'class': 'd-flex align-items-center gap-2 justify-content-md-end flex-wrap'}}) }}
+                <div class="input-group" style="max-width: 380px;">
+                    <span class="input-group-text bg-white border-end-0 text-muted">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    {{ form_widget(form.q, {'attr': {'class': 'form-control border-start-0 ps-0', 'placeholder': 'Rechercher par nom ou adresse...'}}) }}
+                    <button type="submit" class="btn btn-teranga">
+                        <span>Filtrer</span>
+                    </button>
+                </div>
+                {% if search.q is not empty %}
+                    <a href="{{ path('app_groupement_index') }}" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1">
+                        <i class="bi bi-x-circle"></i>
+                        <span>Effacer</span>
+                    </a>
+                {% endif %}
+            {{ form_end(form) }}
+        </div>
     </div>
-    <span class="badge bg-dark rounded-pill px-3 py-2">{{ groupements|length }} groupements</span>
 </div>
 
+<!-- Liste des Groupements en Tableau -->
 <div class="table-teranga-wrapper">
     <div class="table-responsive">
         <table class="table table-teranga table-hover align-middle">
@@ -123,13 +151,57 @@
                 {% else %}
                     <tr>
                         <td colspan="7" class="text-center py-5 text-muted">
-                            <i class="bi bi-inbox fs-2 d-block mb-2"></i>
-                            Aucun groupement enregistré dans l'application.
+                            <i class="bi bi-inbox fs-2 d-block mb-2 text-warning"></i>
+                            {% if search.q is not empty %}
+                                Aucun groupement ne correspond à la recherche "<strong>{{ search.q }}</strong>".
+                                <div class="mt-2">
+                                    <a href="{{ path('app_groupement_index') }}" class="btn btn-sm btn-outline-secondary">
+                                        Voir tous les groupements
+                                    </a>
+                                </div>
+                            {% else %}
+                                Aucun groupement enregistré dans l'application.
+                            {% endif %}
                         </td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+</div>
+
+<!-- Pagination Générique (PageDTO) -->
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mt-4">
+    <div class="text-muted small">
+        Affichage de <strong>{{ groupements|length }}</strong> sur un total de <strong>{{ pageDTO.totalElements }}</strong> groupement(s)
+        (Page {{ pageDTO.pageEnCours }} sur {{ pageDTO.nombreDePages }})
+    </div>
+
+    {% if pageDTO.nombreDePages > 1 %}
+        <nav aria-label="Pagination des groupements">
+            <ul class="pagination pagination-sm mb-0">
+                <!-- Bouton Précédent -->
+                <li class="page-item {% if not pageDTO.hasPrevious %}disabled{% endif %}">
+                    <a class="page-link" href="{{ path('app_groupement_index', {page: pageDTO.pageEnCours - 1}) }}" tabindex="{% if not pageDTO.hasPrevious %}-1{% endif %}">
+                        <i class="bi bi-chevron-left me-1"></i>Précédent
+                    </a>
+                </li>
+
+                <!-- Numéros de Page -->
+                {% for p in 1..pageDTO.nombreDePages %}
+                    <li class="page-item {% if p == pageDTO.pageEnCours %}active{% endif %}">
+                        <a class="page-link" href="{{ path('app_groupement_index', {page: p}) }}">{{ p }}</a>
+                    </li>
+                {% endfor %}
+
+                <!-- Bouton Suivant -->
+                <li class="page-item {% if not pageDTO.hasNext %}disabled{% endif %}">
+                    <a class="page-link" href="{{ path('app_groupement_index', {page: pageDTO.pageEnCours + 1}) }}">
+                        Suivant<i class="bi bi-chevron-right ms-1"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    {% endif %}
 </div>
 {% endblock %}

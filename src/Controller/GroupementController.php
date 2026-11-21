@@ -2,8 +2,11 @@
 
 namespace App\Controller;
 
+use App\DTO\GroupSearchDTO;
+use App\Form\GroupSearchType;
 use App\Service\GroupementService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -15,27 +18,27 @@ final class GroupementController extends AbstractController
 
     #[Route('/', name: 'app_home')]
     #[Route('/groupements', name: 'app_groupement_index')]
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $groupements = $this->groupementService->getGroupementsForListing();
+        $searchDTO = new GroupSearchDTO();
+        $form = $this->createForm(GroupSearchType::class, $searchDTO);
+        $form->handleRequest($request);
 
-        // Calcul des agrégats pour la Calebasse Centrale
-        $totalCaisse = 0.0;
-        $totalMembres = 0;
-        $totalCampagnes = 0;
+        // Récupération sécurisée du numéro de page
+        $page = max(1, $request->query->getInt('page', 1));
 
-        foreach ($groupements as $g) {
-            $totalCaisse += (float) str_replace([' ', 'FCFA'], '', $g->soldeCaisseSociale);
-            $totalMembres += $g->nombreMembres;
-            $totalCampagnes += $g->nombreCampagnes;
-        }
+        // Récupération paginée avec filtre
+        $pageDTO = $this->groupementService->getPaginatedGroupements($searchDTO, $page, limit: 6);
+
+        // Métriques globales pour la bannière Calebasse Centrale
+        $stats = $this->groupementService->getGlobalStats();
 
         return $this->render('groupement/index.html.twig', [
-            'groupements' => $groupements,
-            'total_caisse' => number_format($totalCaisse, 0, ',', ' ') . ' FCFA',
-            'total_membres' => $totalMembres,
-            'total_campagnes' => $totalCampagnes,
-            'total_groupements' => count($groupements),
+            'form' => $form->createView(),
+            'pageDTO' => $pageDTO,
+            'groupements' => $pageDTO->elements,
+            'stats' => $stats,
+            'search' => $searchDTO,
         ]);
     }
 

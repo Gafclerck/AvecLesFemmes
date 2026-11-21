@@ -4,9 +4,11 @@ namespace App\Service;
 
 use App\DTO\CampagneDTO;
 use App\DTO\ExerciceDTO;
+use App\DTO\GroupSearchDTO;
 use App\DTO\GroupementDetailDTO;
 use App\DTO\GroupementListItemDTO;
 use App\DTO\MembreDTO;
+use App\DTO\PageDTO;
 use App\Entity\Exercice;
 use App\Entity\Groupement;
 use App\Enum\StatutExercice;
@@ -15,8 +17,20 @@ use App\Repository\GroupementRepository;
 class GroupementService
 {
     public function __construct(
-        private readonly GroupementRepository $groupementRepository
+        private readonly GroupementRepository $groupementRepository,
+        private readonly PaginationService $paginationService
     ) {}
+
+    /**
+     * @return PageDTO<GroupementListItemDTO>
+     */
+    public function getPaginatedGroupements(?GroupSearchDTO $search = null, int $page = 1, int $limit = 6): PageDTO
+    {
+        $qb = $this->groupementRepository->createSearchQueryBuilder($search);
+        $pageEntities = $this->paginationService->paginate($qb, $page, $limit);
+
+        return $pageEntities->map(fn(Groupement $g) => $this->mapGroupementToListItemDTO($g));
+    }
 
     /**
      * @return list<GroupementListItemDTO>
@@ -24,28 +38,50 @@ class GroupementService
     public function getGroupementsForListing(): array
     {
         $groupements = $this->groupementRepository->findAll();
-        $dtos = [];
 
-        foreach ($groupements as $groupement) {
-            $exerciceActif = $this->resolveExerciceEnCours($groupement);
-            $exerciceDTO = $exerciceActif ? $this->mapExerciceToDTO($exerciceActif) : null;
+        return array_map(fn(Groupement $g) => $this->mapGroupementToListItemDTO($g), $groupements);
+    }
 
-            $caisse = $groupement->getCaisseSociale();
-            $solde = $caisse ? $caisse->getSoldeTotal() : '0.00';
+    public function getGlobalStats(): array
+    {
+        $groupements = $this->groupementRepository->findAll();
+        $totalCaisse = 0.0;
+        $totalMembres = 0;
+        $totalCampagnes = 0;
 
-            $dtos[] = new GroupementListItemDTO(
-                id: $groupement->getId() ?? 0,
-                nom: $groupement->getNom() ?? '',
-                description: $groupement->getDescription(),
-                soldeCaisseSociale: number_format((float) $solde, 0, ',', ' ') . ' FCFA',
-                nombreMembres: count($groupement->getMembres()),
-                nombreCampagnes: count($groupement->getCampagnes()),
-                exerciceEnCours: $exerciceDTO,
-                initiales: $this->generateInitials($groupement->getNom() ?? '')
-            );
+        foreach ($groupements as $g) {
+            $caisse = $g->getCaisseSociale();
+            $totalCaisse += (float) ($caisse ? $caisse->getSoldeTotal() : 0);
+            $totalMembres += count($g->getMembres());
+            $totalCampagnes += count($g->getCampagnes());
         }
 
-        return $dtos;
+        return [
+            'totalCaisse' => number_format($totalCaisse, 0, ',', ' ') . ' FCFA',
+            'totalMembres' => $totalMembres,
+            'totalCampagnes' => $totalCampagnes,
+            'totalGroupements' => count($groupements),
+        ];
+    }
+
+    private function mapGroupementToListItemDTO(Groupement $groupement): GroupementListItemDTO
+    {
+        $exerciceActif = $this->resolveExerciceEnCours($groupement);
+        $exerciceDTO = $exerciceActif ? $this->mapExerciceToDTO($exerciceActif) : null;
+
+        $caisse = $groupement->getCaisseSociale();
+        $solde = $caisse ? $caisse->getSoldeTotal() : '0.00';
+
+        return new GroupementListItemDTO(
+            id: $groupement->getId() ?? 0,
+            nom: $groupement->getNom() ?? '',
+            description: $groupement->getDescription(),
+            soldeCaisseSociale: number_format((float) $solde, 0, ',', ' ') . ' FCFA',
+            nombreMembres: count($groupement->getMembres()),
+            nombreCampagnes: count($groupement->getCampagnes()),
+            exerciceEnCours: $exerciceDTO,
+            initiales: $this->generateInitials($groupement->getNom() ?? '')
+        );
     }
 
     public function getGroupementDetail(int $id): ?GroupementDetailDTO
