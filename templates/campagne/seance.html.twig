@@ -7,7 +7,7 @@
 <nav class="breadcrumb-teranga" aria-label="breadcrumb">
     <ol class="breadcrumb mb-0">
         <li class="breadcrumb-item"><a href="{{ path('app_groupement_index') }}"><i class="bi bi-house-door-fill me-1"></i>Accueil</a></li>
-        <li class="breadcrumb-item"><a href="{{ path('app_groupement_show', {id: campagne.groupement.id}) }}">{{ campagne.groupement.nom }}</a></li>
+        <li class="breadcrumb-item"><a href="{{ path('app_groupement_show', {id: campagne.groupementId}) }}">{{ campagne.groupementNom }}</a></li>
         <li class="breadcrumb-item"><a href="{{ path('app_campagne_show', {id: campagne.id}) }}">{{ campagne.nom }}</a></li>
         <li class="breadcrumb-item active text-dark" aria-current="page">Séance du {{ seance.dateFormatted }}</li>
     </ol>
@@ -186,7 +186,7 @@
         <div class="text-center pb-3 border-bottom border-dark border-opacity-10">
             <div class="fs-3">🍯</div>
             <h4 class="fw-bold mb-0 text-dark">REÇU OFFICIEL DE COTISATION</h4>
-            <div class="text-muted small text-uppercase letter-spacing-1">{{ campagne.groupement.nom }}</div>
+            <div class="text-muted small text-uppercase letter-spacing-1">{{ campagne.groupementNom }}</div>
         </div>
 
         <div class="row g-3 my-3 text-center">

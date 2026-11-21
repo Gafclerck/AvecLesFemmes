@@ -27,29 +27,7 @@ class CampagneService
             return null;
         }
 
-        $groupement = $campagne->getGroupement();
-        $type = str_contains(strtolower($campagne::class), 'tontine') ? 'Tontine' : 'Épargne Calebasse';
-        $per = $campagne->getPeriodicite();
-
-        $campagneDTO = new CampagneDTO(
-            id: $campagne->getId() ?? 0,
-            nom: $campagne->getNom() ?? '',
-            type: $type,
-            dateDebut: $campagne->getDateDebutAt()?->format('d/m/Y') ?? '',
-            dateFin: $campagne->getDateFinAt()?->format('d/m/Y') ?? '',
-            montant: number_format((float) $campagne->getMontant(), 0, ',', ' ') . ' FCFA',
-            periodicite: $per?->value ?? 'hebdomadaire',
-            periodiciteLabel: $per?->label() ?? 'Hebdomadaire',
-            jourRencontre: $campagne->getJourRencontre() ?? 'DIMANCHE',
-            montantFixe: number_format((float) ($campagne->getMontantFixe() ?? 0), 0, ',', ' ') . ' FCFA',
-            montantCaissePresent: number_format((float) ($campagne->getMontantCaissePresent() ?? 0), 0, ',', ' ') . ' FCFA',
-            montantCaisseAbsent: number_format((float) ($campagne->getMontantCaisseAbsent() ?? 0), 0, ',', ' ') . ' FCFA',
-            amendeJournaliere: number_format((float) ($campagne->getAmendeJournaliere() ?? 0), 0, ',', ' ') . ' FCFA',
-            groupementId: $groupement?->getId() ?? 0,
-            groupementNom: $groupement?->getNom() ?? '',
-            exercicePeriode: $campagne->getExercice() ? sprintf('Exercice %s', $campagne->getExercice()->getDateDebut()?->format('Y') ?? '') : null,
-            nombreMembres: count($campagne->getMembreCampagnes())
-        );
+        $campagneDTO = $this->mapCampagneToDTO($campagne);
 
         // Membres inscrits (MembreCampagneDTO)
         $participantsDTO = [];
@@ -207,9 +185,36 @@ class CampagneService
         );
 
         return [
-            'campagne' => $campagne,
+            'campagne' => $this->mapCampagneToDTO($campagne),
             'seance' => $seanceSummary,
         ];
+    }
+
+    private function mapCampagneToDTO(Campagne $campagne): CampagneDTO
+    {
+        $groupement = $campagne->getGroupement();
+        $type = str_contains(strtolower($campagne::class), 'tontine') ? 'Tontine' : 'Épargne Calebasse';
+        $per = $campagne->getPeriodicite();
+
+        return new CampagneDTO(
+            id: $campagne->getId() ?? 0,
+            nom: $campagne->getNom() ?? '',
+            type: $type,
+            dateDebut: $campagne->getDateDebutAt()?->format('d/m/Y') ?? '',
+            dateFin: $campagne->getDateFinAt()?->format('d/m/Y') ?? '',
+            montant: number_format((float) $campagne->getMontant(), 0, ',', ' ') . ' FCFA',
+            periodicite: $per?->value ?? 'hebdomadaire',
+            periodiciteLabel: $per?->label() ?? 'Hebdomadaire',
+            jourRencontre: $campagne->getJourRencontre() ?? 'DIMANCHE',
+            montantFixe: number_format((float) ($campagne->getMontantFixe() ?? 0), 0, ',', ' ') . ' FCFA',
+            montantCaissePresent: number_format((float) ($campagne->getMontantCaissePresent() ?? 0), 0, ',', ' ') . ' FCFA',
+            montantCaisseAbsent: number_format((float) ($campagne->getMontantCaisseAbsent() ?? 0), 0, ',', ' ') . ' FCFA',
+            amendeJournaliere: number_format((float) ($campagne->getAmendeJournaliere() ?? 0), 0, ',', ' ') . ' FCFA',
+            groupementId: $groupement?->getId() ?? 0,
+            groupementNom: $groupement?->getNom() ?? '',
+            exercicePeriode: $campagne->getExercice() ? sprintf('Exercice %s', $campagne->getExercice()->getDateDebut()?->format('Y') ?? '') : null,
+            nombreMembres: count($campagne->getMembreCampagnes())
+        );
     }
 
     /**
