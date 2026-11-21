@@ -13,6 +13,7 @@ readonly class ExerciceDTO
         public string $statut,
         public string $statutLabel,
         public bool $isEnCours,
-        public string $labelPeriode
+        public string $labelPeriode,
+        public ?int $joursRestants = null
     ) {}
 }

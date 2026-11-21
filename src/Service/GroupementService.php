@@ -144,20 +144,22 @@ class GroupementService
     private function mapExerciceToDTO(Exercice $exercice): ExerciceDTO
     {
         $isEnCours = $exercice->getStatut() === StatutExercice::EN_COURS;
-        $debut = $exercice->getDateDebut()?->format('d/m/Y') ?? '';
-        $fin = $exercice->getDateFin()?->format('d/m/Y') ?? '';
+        $debut = DateService::formatDate($exercice->getDateDebut());
+        $fin = DateService::formatDate($exercice->getDateFin());
         $label = sprintf('Exercice %s (%s - %s)', $exercice->getDateDebut()?->format('Y') ?? '', $debut, $fin);
+        $joursRestants = DateService::calculateDaysRemaining($exercice->getDateLimitePret());
 
         return new ExerciceDTO(
             id: $exercice->getId() ?? 0,
             dateDebut: $debut,
             dateFin: $fin,
-            dateLimitePret: $exercice->getDateLimitePret()?->format('d/m/Y'),
-            dateRetribution: $exercice->getDateRetribution()?->format('d/m/Y'),
+            dateLimitePret: DateService::formatDate($exercice->getDateLimitePret()) ?: null,
+            dateRetribution: DateService::formatDate($exercice->getDateRetribution()) ?: null,
             statut: $exercice->getStatut()?->value ?? '',
             statutLabel: $exercice->getStatut()?->label() ?? 'En cours',
             isEnCours: $isEnCours,
-            labelPeriode: $label
+            labelPeriode: $label,
+            joursRestants: $joursRestants
         );
     }
 

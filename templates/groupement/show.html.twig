@@ -50,7 +50,20 @@
                     </div>
                     <div class="d-flex flex-wrap gap-4 mt-2 text-muted small">
                         {% if groupement.exerciceEnCours.dateLimitePret %}
-                            <span>Limite des prêts : <strong>{{ groupement.exerciceEnCours.dateLimitePret }}</strong></span>
+                            <span>
+                                Limite des prêts : <strong>{{ groupement.exerciceEnCours.dateLimitePret }}</strong>
+                                {% if groupement.exerciceEnCours.joursRestants is not null %}
+                                    <span class="badge {% if groupement.exerciceEnCours.joursRestants > 15 %}bg-success-subtle text-success border border-success-subtle{% elseif groupement.exerciceEnCours.joursRestants >= 0 %}bg-warning-subtle text-warning-emphasis border border-warning-subtle{% else %}bg-danger-subtle text-danger border border-danger-subtle{% endif %} rounded-pill ms-1">
+                                        {% if groupement.exerciceEnCours.joursRestants > 0 %}
+                                            {{ groupement.exerciceEnCours.joursRestants }} j restant{{ groupement.exerciceEnCours.joursRestants > 1 ? 's' : '' }}
+                                        {% elseif groupement.exerciceEnCours.joursRestants == 0 %}
+                                            Dernier jour
+                                        {% else %}
+                                            Clôturé
+                                        {% endif %}
+                                    </span>
+                                {% endif %}
+                            </span>
                         {% endif %}
                         {% if groupement.exerciceEnCours.dateRetribution %}
                             <span>Rétribution / Partage : <strong>{{ groupement.exerciceEnCours.dateRetribution }}</strong></span>
